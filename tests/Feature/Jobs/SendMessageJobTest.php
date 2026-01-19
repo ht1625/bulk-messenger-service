@@ -25,21 +25,13 @@ class SendMessageJobTest extends TestCase
             ], 200),
         ]);
 
-        $mockSender = $this->mock(MessageSenderServiceInterface::class);
-        $mockSender->shouldReceive('send')
-            ->once()
-            ->andReturn([
-                'success' => true,
-                'provider_message_id' => 'abc-123'
-            ]);
-
         $message = Message::factory()->create([
             'status' => MessageStatus::PENDING,
         ]);
 
         (new SendMessageJob($message->id))->handle(
             app(\App\Repositories\Contracts\MessageRepositoryInterface::class),
-            $mockSender
+            app(MessageSenderServiceInterface::class)
         );
 
         $message->refresh();
@@ -47,4 +39,5 @@ class SendMessageJobTest extends TestCase
         $this->assertEquals(MessageStatus::SENT, $message->status);
         $this->assertEquals('abc-123', $message->provider_message_id);
     }
+
 }
