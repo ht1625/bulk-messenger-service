@@ -7,6 +7,7 @@ use App\Models\Message;
 use App\Support\Enums\MessageStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class SendMessageJobTest extends TestCase
