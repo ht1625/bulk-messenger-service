@@ -4,10 +4,10 @@ namespace Tests\Feature\Jobs;
 
 use App\Jobs\SendMessageJob;
 use App\Models\Message;
+use App\Services\Messaging\Contracts\MessageSenderServiceInterface;
 use App\Support\Enums\MessageStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class SendMessageJobTest extends TestCase
@@ -16,15 +16,19 @@ class SendMessageJobTest extends TestCase
 
     public function test_job_marks_message_as_sent_after_successful_send(): void
     {
-        config(['cache.default' => 'array']);
-        
-        Cache::spy();
-
         Http::fake([
             '*' => Http::response([
                 'messageId' => 'abc-123'
             ], 200),
         ]);
+
+        $mockSender = $this->mock(MessageSenderServiceInterface::class);
+        $mockSender->shouldReceive('send')
+            ->once()
+            ->andReturn([
+                'success' => true,
+                'provider_message_id' => 'abc-123'
+            ]);
 
         $message = Message::factory()->create([
             'status' => MessageStatus::PENDING,
@@ -32,7 +36,7 @@ class SendMessageJobTest extends TestCase
 
         (new SendMessageJob($message->id))->handle(
             app(\App\Repositories\Contracts\MessageRepositoryInterface::class),
-            app(\App\Services\Messaging\Contracts\MessageSenderServiceInterface::class),
+            $mockSender
         );
 
         $message->refresh();
