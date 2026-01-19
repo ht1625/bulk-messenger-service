@@ -12,6 +12,7 @@ use OpenApi\Attributes as OA;
 /**
  * Handles message-related API endpoints.
  */
+#[OA\Tag(name: "Messages")]
 class MessageController extends Controller
 {
     /**
@@ -21,6 +22,23 @@ class MessageController extends Controller
         private MessageRepositoryInterface $messageRepository
     ) {}
 
+    #[OA\Get(
+        path: "/api/v1/messages/sent",
+        summary: "List sent messages",
+        tags: ["Messages"],
+        parameters: [
+            new OA\Parameter(
+                name: "per_page",
+                in: "query",
+                required: false,
+                schema: new OA\Schema(type: "integer", example: 15)
+            )
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Successful response"),
+            new OA\Response(response: 500, description: "Server error")
+        ]
+    )]
     /**
      * Returns paginated list of sent messages.
      *
