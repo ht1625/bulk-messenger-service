@@ -16,6 +16,9 @@ class SendMessageJobTest extends TestCase
 
     public function test_job_marks_message_as_sent_after_successful_send(): void
     {
+        config(['cache.default' => 'array']);
+        config(['messaging.sent_cache.enabled' => false]);
+
         Http::fake([
             '*' => Http::response([
                 'messageId' => 'abc-123'
